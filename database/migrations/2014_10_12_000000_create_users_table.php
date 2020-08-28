@@ -22,7 +22,8 @@ class CreateUsersTable extends Migration
             $table->timestamp('mobile_verified_at')->nullable();
             $table->string('wechat_open_id')->nullable();
             $table->string('region')->nullable()->default('CN');
-            $table->string('password');
+            $table->string('password')->nullable();
+            $table->string('api_token')->unique()->nullable()->default(null);
             $table->rememberToken();
             $table->timestamps();
         });

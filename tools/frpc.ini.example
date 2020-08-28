@@ -1,0 +1,22 @@
+[common]
+server_addr = xxx.xxx.xxx.xxxw
+server_port = 7000
+
+[wdev]
+type = http
+local_port = 80
+;根据自己的开发环境替换一下域名
+custom_domains = wdev.kongkx.com
+
+[wdev_https]
+type = https
+;根据自己的开发环境替换一下域名
+custom_domains = wdev.kongkx.com
+local_port = 8080
+
+;plugin = https2http
+;plugin_local_addr = 127.0.0.1:80
+;plugin_key_path = ./privkey.pem
+;plugin_crt_path = ./cert.pem
+;plugin_host_header_rewrite = wdev.kongkx.com
+;plugin_header_X-From-Where = frp

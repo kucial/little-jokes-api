@@ -13,7 +13,7 @@ class CreateUserPostLikeTable extends Migration
      */
     public function up()
     {
-        Schema::create('user_post_like', function (Blueprint $table) {
+        Schema::create('post_likes', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('post_id');
@@ -29,6 +29,6 @@ class CreateUserPostLikeTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('user_post_like');
+        Schema::dropIfExists('post_likes');
     }
 }
