@@ -26,57 +26,80 @@
 
 1. Clone 项目
 
-```bash
-# 将 laradock submodule 一并拉取
-git clone --recurse-submodules 
-```
+    ```bash
+    # 将 laradock submodule 一并拉取
+    git clone --recurse-submodules 
+    ```
 
 2. 进入项目目录，创建项目的 `.env`
 
-```bash
-cp .env.exmaple .env
-```
+    ```bash
+    cp .env.exmaple .env
+    ```
 
-对 `.env` 进行修改
+    对 `.env` 进行修改
 
-2. 进入 `<项目目录>/laradock`，创建 laradock 的 `.env`
+3. 进入 `<项目目录>/laradock`，创建 laradock 的 `.env`
 
-```bash
-cp env.example .env
-``` 
+    ```bash
+    cp env.example .env
+    ``` 
 
-3. 启动 `laradock` 服务
+4. 启动 `laradock` 服务
 
-```bash
-docker-compose up -d nginx mysql php-fpm redis
-```
+    ```bash
+    docker-compose up -d nginx mysql php-fpm redis
+    ```
 
-4. 进入 `laradock` 的 `workspace`
+5. 进入 `laradock` 的 `workspace`
 
-```bash
-docker-compose exec workspace bash
-```
+    ```bash
+    docker-compose exec workspace bash
+    ```
 
-5. 初始化数据库
+6. 初始化数据库
 
-```bash
-# 在 workspace 的 bash 中
-root@<container-id>: /var/www# php artisan migrate
-```
+    ```bash
+    # 在 workspace 的 bash 中
+    root@<container-id>: /var/www# php artisan migrate
+    ```
 
-6. 生成测试数据
+7. 生成测试数据
 
-```bash
-# 在 workspace 的 bash 中
-root@<container-id>: /var/www# php artisan db:seed
-```
+    ```bash
+    # 在 workspace 的 bash 中
+    root@<container-id>: /var/www# php artisan db:seed
+    ```
 
 
 laradock 的使用方式可以查阅 [laradock 文档](https://laradock.io/documentation/)
     
 ## API
 
-### API Common
+| 名称 | 描述 | 地址 ｜
+| --- | --- |  --- |
+| [Post.get](#postget) | 获取文章内容 |  GET `/api/posts/{id}` |
+| [Post.like](#postlike) | 收藏文章 | POST `/api/posts/{id}/_like` |
+| [Post.unlike](#postunlike) | 取消收藏文章 | POST `/api/posts/{id}/_unlike` |
+| [Post.report](#postreport) | 举报文章 | POST `/api/posts/{id}/_report` |
+| [Post.vote](#postvote) | 投票 | POST `/api/posts/{id}/_vote` |
+| [Post.userLiked](#postuserliked) | 用户收藏列表 | GET `/api/users/{id}/liked-posts` |
+| | | |
+| [PostLike.archive](#postlikearchive) | 归档收藏记录 | POST `/api/likes/{id}/_archive` |
+| [PostLike.archive](#postlikeunarchive) | 取消归档收藏记录 | POST `/api/likes/{id}/_unarchive` |
+| | | |
+| [Feed.latest](#feedlatest) | 最新文章列表 | GET `/api/feed/latest` |
+| [Feed.hottest](#feedlatest) | 最热文章列表 | GET `/api/feed/hottest` |
+| [Feed.random](#feedlatest) | 随机文章列表 | GET `/api/feed/random` |
+| | | |
+| [Auth.Register.sendPhoneCode](#authregistersendphonecode) | 发送注册验证码 | POST `/api/auth/register/send_phone_code` |
+| [Auth.Register.withPhoneCode](#authregisterwithphonecode) | 手机验证码注册 | GET `/api/auth/register/with_phone_code` |
+| [Auth.Login.sendPhoneCode](#authloginsendphonecode) | 发送登录验证码 | POST `/api/auth/login/send_phone_code` |
+| [Auth.Login.withPhoneCode](#authloginwithphonecode) | 手机验证码登录 | POST `/api/auth/login/with_phone_code` |
+| [Auth.Login.withPhonePassword](#authloginwithphonepassword) | 手机密码登录 | POST `/api/auth/login/with_phone_password` |
+
+
+### API 公共规范
 
 API Response 的数据结果：
 
@@ -112,6 +135,8 @@ interface ErrorResponse {
 }
 ```
 
+---
+
 ### Post
 
 资源数据结构
@@ -126,6 +151,8 @@ class Post {
     like?: PostLike; // 当前用户的点赞信息
 }
 ```
+
+---
 
 #### Post.get
 
@@ -147,6 +174,8 @@ interface PostResource {
     data: Post,
 }
 ```
+
+---
 
 #### Post.like
 
@@ -173,6 +202,8 @@ interface PostResource {
 // 401 code: NOT_AUTHENTICATED
 ```
 
+---
+
 #### Post.unlike
 
 取消收藏文章
@@ -198,7 +229,9 @@ interface PostResource {
 // 401 code: NOT_AUTHENTICATED
 ```
 
-#### Post._report
+---
+
+#### Post.report
 
 举报文章内容
 
@@ -235,6 +268,8 @@ class PostReport {
 
 // 422 code: VALIDATION_FAILED 表单验证错误
 ```
+
+---
 
 #### Post.vote
 
@@ -273,6 +308,8 @@ enum VoteType {
 }
 ```
 
+---
+
 #### Post.userLiked 
 
 获取用户收获的文章列表。权限：
@@ -294,6 +331,7 @@ GET `/api/users/{id}/liked-posts`
 // 403 code: NOT_AUTHORIZED
 ```
 
+---
 
 ### PostLike
 
@@ -309,6 +347,8 @@ class PostLike {
     archived_at: DateString;
 }
 ```
+
+---
 
 #### PostLike.archive
 
@@ -337,6 +377,8 @@ POST `/api/likes/{id}/_archive`
 // 403 code: NOT_AUTHORIZED 无权进行归档
 ```
 
+---
+
 #### PostLike.unarchive
 
 取消收藏记录的归档
@@ -363,6 +405,7 @@ POST `/api/likes/{id}/_unarchive`
 
 // 403 code: NOT_AUTHORIZED 无权进行归档
 ```
+---
 
 ### Feed
 
@@ -388,6 +431,7 @@ interface FeedResponse {
 }
 ```
 
+---
 
 #### Feed.hottest
 
@@ -402,6 +446,8 @@ GET `/api/feed/hottest`
 **Response**
 
 返回数据结构，同 `Feed.latest`
+
+---
 
 #### Feed.random
 
@@ -421,6 +467,8 @@ GET `/api/feed/random`
 
 返回数据结构，同 `Feed.latest`
 
+---
+
 ### Auth
 
 用户登录认证相关。认证成功后，统一返回的数据结构：
@@ -439,6 +487,8 @@ interface AuthSuccessResponse {
 }
 ```
 
+---
+
 #### 用户注册
 
 用户可以通过手机号码进行注册，注册步骤与接口调用顺序
@@ -447,7 +497,9 @@ interface AuthSuccessResponse {
 2. 用户请求验证码, [POST] `/api/auth/register/send_phone_code`
 3. 用户输入验证吗，并提交 [POST] `/api/auth/register/with_phone_code`
 
-##### Auth.Register.sendPhoneCode
+---
+
+#### Auth.Register.sendPhoneCode
 
 请求发送注册验证码
 
@@ -467,9 +519,13 @@ interface AuthSuccessResponse {
 // 422 code: REGISTERED 已注册
 ```
 
-##### Auth.Register.withPhoneCode
+---
+
+#### Auth.Register.withPhoneCode
 
 使用手机号码及验证码完成注册
+
+[POST] `/api/auth/register/with_phone_code`
 
 **Body 参数**
 
@@ -488,13 +544,17 @@ interface AuthSuccessResponse {
 // 422 code: INVALID_CODE
 ```
 
+---
+
 #### 登录
 
 登录方式有两种，分别是 "验证码登录" 与 "密码登录"
 
 使用"验证码登录"时，需要先调用请求验证码登录的接口，再验证验证码
 
-##### Auth.Login.sendPhoneCode
+---
+
+#### Auth.Login.sendPhoneCode
 
 请求登录验证码
 
@@ -514,7 +574,9 @@ interface AuthSuccessResponse {
 // 422 code: VALIDATION_FAILED
 ```
 
-##### Auth.Login.withPhoneCode
+---
+
+#### Auth.Login.withPhoneCode
 
 使用验证码进行登录
 
@@ -538,7 +600,9 @@ interface AuthSuccessResponse {
 
 ```
 
-##### Auth.Login.withPhonePassword
+---
+
+#### Auth.Login.withPhonePassword
 
 使用验证码登录，一般用于测试账号的登录
 
