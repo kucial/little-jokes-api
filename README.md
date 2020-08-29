@@ -76,7 +76,12 @@ laradock 的使用方式可以查阅 [laradock 文档](https://laradock.io/docum
     
 ## API
 
-| 名称 | 描述 | 地址 ｜
+Postman collection 地址：https://www.postman.com/collections/ecae4bac5f42feba213a
+
+可在 Postman > import > link ，粘贴地址，> Continue 进行导入 
+
+
+| 名称 | 描述 | 地址 |
 | --- | --- |  --- |
 | [Post.get](#postget) | 获取文章内容 |  GET `/api/posts/{id}` |
 | [Post.like](#postlike) | 收藏文章 | POST `/api/posts/{id}/_like` |
