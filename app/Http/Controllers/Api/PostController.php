@@ -102,7 +102,7 @@ class PostController extends Controller
             ], 403);
         }
 
-        $pageSize = $request->query('page_size', 20);
+        $pageSize = (int) $request->query('page_size', 20);
 
         $posts = Post::select('posts.*')
             ->with([

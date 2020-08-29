@@ -26,6 +26,7 @@ class RegisterController extends Controller
         if ($exists) {
             return response()->json([
                 'code' => 'REGISTERED',
+                'message' => '手机号码已注册'
             ], 422);
         }
 
@@ -56,18 +57,28 @@ class RegisterController extends Controller
     public function phoneRegister(Request $request)
     {
         $validatedData = $request->validate([
-            'phone' => 'required|unique:users,mobile', // should be E164 phone number
+            'phone' => 'required', // should be E164 phone number
             'code' => 'required',
             'password' => 'sometimes',
             'region' => 'sometimes|default:CN'
         ]);
+
+        $exists = DB::table('users')->where('mobile', $validatedData['phone'])
+            ->exists();
+        if ($exists) {
+            return response()->json([
+                'code' => 'REGISTERED',
+                'message' => '手机号码已注册'
+            ], 422);
+        }
 
         // verify;
         $cachedCode = Cache::get('register.'.$validatedData['phone']);
 
         if ($cachedCode !== $validatedData['code']) {
             return response()->json([
-                'code' => 'INVALID_CODE'
+                'code' => 'INVALID_CODE',
+                'message' => '验证码不正确'
             ], 422);
         }
 

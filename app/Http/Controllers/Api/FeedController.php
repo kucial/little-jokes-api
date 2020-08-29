@@ -5,16 +5,14 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Post;
 use App\Http\Resources\Post as PostResource;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 
 class FeedController extends Controller
 {
     public function latest(Request $request)
     {
-        $pageSize = $request->query('page_size', 20);
+        $pageSize = (int) $request->query('page_size', 20);
 
         $userId = auth()->id();
 
@@ -31,7 +29,7 @@ class FeedController extends Controller
         $request->validate([
             'seed' => 'required|integer',
         ]);
-        $pageSize = $request->query('page_size', 20);
+        $pageSize = (int) $request->query('page_size', 20);
 
         $userId = auth()->id();
         $posts = Post::with([
@@ -52,7 +50,7 @@ class FeedController extends Controller
     public function hottest(Request $request)
     {
         // 一段时间内的得分排序
-        $pageSize = $request->query('page_size', 20);
+        $pageSize = (int) $request->query('page_size', 20);
         $userId = auth()->id();
 //        $time = Carbon::now()->subHour(12);
 

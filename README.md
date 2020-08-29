@@ -1,61 +1,563 @@
-<p align="center"><img src="https://res.cloudinary.com/dtfbvvkyp/image/upload/v1566331377/laravel-logolockup-cmyk-red.svg" width="400"></p>
+# Little Jokes 小小笑话
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/d/total.svg" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/v/stable.svg" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/license.svg" alt="License"></a>
-</p>
+小小笑话是一个简单的笑话API服务。当前处于API开发阶段，未提供真实数据
 
-## About Laravel
+## 功能列表
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- Feed
+    - 热门列表，最新列表，随机列表
+- 用户认证
+    - 注册、登录
+- Post
+    - 获取文章（笑话）
+    - 收藏、取消收藏
+    - 内容举报
+    - 用户收藏列表
+- 收藏管理 
+    - 归档、取消归档
+    
+## TODO
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- [ ] 举报管理
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## 开发部署
 
-## Learning Laravel
+此项目使用 [laradock](https://laradock.io/) 作为开发环境，需要使用的服务有 `mysql`, `nginx`, `php-fpm`, `redis`
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+1. Clone 项目
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 1500 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+```bash
+# 将 laradock submodule 一并拉取
+git clone --recurse-submodules 
+```
 
-## Laravel Sponsors
+2. 进入项目目录，创建项目的 `.env`
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+```bash
+cp .env.exmaple .env
+```
 
-### Premium Partners
+对 `.env` 进行修改
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[OP.GG](https://op.gg)**
+2. 进入 `<项目目录>/laradock`，创建 laradock 的 `.env`
 
-## Contributing
+```bash
+cp env.example .env
+``` 
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+3. 启动 `laradock` 服务
 
-## Code of Conduct
+```bash
+docker-compose up -d nginx mysql php-fpm redis
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+4. 进入 `laradock` 的 `workspace`
 
-## Security Vulnerabilities
+```bash
+docker-compose exec workspace bash
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+5. 初始化数据库
 
-## License
+```bash
+# 在 workspace 的 bash 中
+root@<container-id>: /var/www# php artisan migrate
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+6. 生成测试数据
+
+```bash
+# 在 workspace 的 bash 中
+root@<container-id>: /var/www# php artisan db:seed
+```
+
+
+laradock 的使用方式可以查阅 [laradock 文档](https://laradock.io/documentation/)
+    
+## API
+
+### API Common
+
+API Response 的数据结果：
+
+```typescript
+interface ResourceResponse<T> {
+    data: T,
+    meta?: Object,
+}
+
+interface CollectionResponse<T> {
+    data: Array<T>,
+    links?: {
+        first: String,
+        last: String,
+        prev?: String,
+        next?: String,
+    },
+    meta?: {
+        current_page: Number,
+        from: Number,
+        last_page: Number,
+        path: String, // API request path
+        per_page: Number,
+        to: Number,
+        total: Number
+    }
+}
+
+interface ErrorResponse {
+    code: String;
+    message: String; 
+    data?: Object;
+}
+```
+
+### Post
+
+资源数据结构
+
+```typescript
+class Post {
+    id: Number;
+    content: String;
+    created_at: DateString;
+    updated_at: DateString;
+    blocked_at?: DateString;
+    like?: PostLike; // 当前用户的点赞信息
+}
+```
+
+#### Post.get
+
+获取文章详情
+
+GET `/api/posts/{id}`,
+
+**Path 参数**
+
+| 名称 | 类型 | 必填 | 描述 | 
+| --- | --- | --- | --- |
+| id | Number | 是 | 文章ID |
+
+**Response**
+
+```typescript
+// 200
+interface PostResource {
+    data: Post,
+}
+```
+
+#### Post.like
+
+收藏文章
+
+POST `/api/posts/{id}/_like`
+
+**Path 参数**
+
+| 名称 | 类型 | 必填 | 描述 | 
+| --- | --- | --- | --- |
+| id | Number | 是 | 文章ID |
+
+**Response**
+
+```typescript
+// 200 
+interface PostResource {
+    data: Post,
+}
+
+// 400 code: HAS_LIKED
+
+// 401 code: NOT_AUTHENTICATED
+```
+
+#### Post.unlike
+
+取消收藏文章
+
+POST `/api/posts/{id}/_unlike`
+
+**Path 参数**
+
+| 名称 | 类型 | 必填 | 描述 | 
+| --- | --- | --- | --- |
+| id | Number | 是 | 文章ID |
+
+**Response**
+
+```typescript
+// 200 
+interface PostResource {
+    data: Post,
+}
+
+// 400 code: NOT_LIKED
+
+// 401 code: NOT_AUTHENTICATED
+```
+
+#### Post._report
+
+举报文章内容
+
+POST `/api/posts/${id}/_report`
+
+**Path 参数**
+
+| 名称 | 类型 | 必填 | 描述 | 
+| --- | --- | --- | --- |
+| id | Number | 是 | 文章ID |
+
+**Body 参数**
+
+| 名称 | 类型 | 必填 | 描述 | 
+| --- | --- | --- | --- |
+| description | String | 是 | 举报原因描述，最大长度：255 |
+
+
+**Response**
+```typescript
+class PostReport {
+  id: Number;
+  post_id: Number;
+  user_id: Number;
+  description: String;
+  
+}
+// 200
+{
+    data: PostReport
+}
+
+// 401 code: NOT_AUTHENTICATED 未认证
+
+// 422 code: VALIDATION_FAILED 表单验证错误
+```
+
+#### Post.vote
+
+对文章进行投票，一个用户只能投一次票，最后一次投票的结果会覆盖上一次的投票
+
+POST `/api/posts/{id}/_vote`
+
+**Path 参数**
+
+| 名称 | 类型 | 必填 | 描述 | 
+| --- | --- | --- | --- |
+| id | Number | 是 | 文章ID |
+
+**Body 参数**
+
+| 名称 | 类型 | 必填 | 描述 | 
+| --- | --- | --- | --- |
+| vote_type | Enum | 是 | 投票类型，点赞(up)或踩(down)，{ UP_VOTE: 1, DOWN_VOTE: -1} |
+
+**Response**
+
+```typescript
+enum VoteType {
+  UP_VOTE = 1,
+  DOWN_VOTE = -1,
+}
+
+// 200 
+{
+    data: {
+        id: Number;
+        user_id: Number;
+        post_id: Number;
+        vote_type: VoteType;
+    }
+}
+```
+
+#### Post.userLiked 
+
+获取用户收获的文章列表。权限：
+
+GET `/api/users/{id}/liked-posts`
+
+**Query 参数**
+
+| 名称 | 类型 | 必填 | 描述 | 
+| --- | --- | --- | --- |
+| page | Number | 否 | 页码，默认值： `1`|
+| page_size | Number | 否 | 分页大小，默认值： `20`|
+
+**Response**
+
+```typescript
+// 200 CollectionResponse<PostResource>
+
+// 403 code: NOT_AUTHORIZED
+```
+
+
+### PostLike
+
+用户收藏文章的记录
+
+```typescript
+class PostLike {
+    id: Number;
+    user_id: Number;
+    post_ik: Number;
+    created_at: DateString;
+    updated_at: DateString;
+    archived_at: DateString;
+}
+```
+
+#### PostLike.archive
+
+将收藏记录归档
+
+POST `/api/likes/{id}/_archive`
+
+**Path 参数**
+
+| 名称 | 类型 | 必填 | 描述 | 
+| --- | --- | --- | --- |
+| id | Number | 是 | Like ID |
+
+**Response**
+
+```typescript
+// 200
+{
+    data: PostLike;
+}
+
+// 400 code: HAS_ARCHIVED  收藏记录已归档
+
+// 401 code: NOT_AUTHENTICATED 未认证
+
+// 403 code: NOT_AUTHORIZED 无权进行归档
+```
+
+#### PostLike.unarchive
+
+取消收藏记录的归档
+
+POST `/api/likes/{id}/_unarchive`
+
+**Path 参数**
+
+| 名称 | 类型 | 必填 | 描述 | 
+| --- | --- | --- | --- |
+| id | Number | 是 | Like ID |
+
+**Response**
+
+```typescript
+// 200
+{
+    data: PostLike;
+}
+
+// 400 code: NOT_ARCHIVED  收藏记录未归档
+
+// 401 code: NOT_AUTHENTICATED 未认证
+
+// 403 code: NOT_AUTHORIZED 无权进行归档
+```
+
+### Feed
+
+#### Feed.latest
+
+获取最新的文章列表
+
+GET `/api/feed/latest`
+
+**Query 参数**
+
+| 名称 | 类型 | 必填 | 描述 | 
+| --- | --- | --- | --- |
+| page | Number | 否 | 页码，默认值： `1`|
+| page_size | Number | 否 | 分页大小，默认值： `20`|
+
+**Response**
+
+```typescript
+interface FeedResponse {
+    data: Array<Post>,
+    meta: PaginationMeta,
+}
+```
+
+
+#### Feed.hottest
+
+获取最热的文章列表
+
+GET `/api/feed/hottest`
+
+**Query 参数**
+
+参数选项同 `Feed.latest`
+
+**Response**
+
+返回数据结构，同 `Feed.latest`
+
+#### Feed.random
+
+获取随机排列的文章列表
+
+GET `/api/feed/random`
+
+**Query 参数**
+
+| 名称 | 类型 |描述 | 
+| --- | --- | --- |
+| page | Number? | 页码，默认值： `1`|
+| page_size | Number? | 分页大小，默认值： `20`|
+| seed | Number | 随机Seed |
+
+**Response**
+
+返回数据结构，同 `Feed.latest`
+
+### Auth
+
+用户登录认证相关。认证成功后，统一返回的数据结构：
+
+```typescript
+class User {
+    id: Number;
+    name: String;
+    created_at: DateString;
+}
+interface AuthSuccessResponse {
+  data: User,
+  meta: {
+      api_token: String,
+  }
+}
+```
+
+#### 用户注册
+
+用户可以通过手机号码进行注册，注册步骤与接口调用顺序
+
+1. 用户填写手机号码
+2. 用户请求验证码, [POST] `/api/auth/register/send_phone_code`
+3. 用户输入验证吗，并提交 [POST] `/api/auth/register/with_phone_code`
+
+##### Auth.Register.sendPhoneCode
+
+请求发送注册验证码
+
+[POST] `/api/auth/register/send_phone_code`
+
+**Body 参数**
+
+| 名称 | 类型 | 必填 | 描述 | 
+| --- | --- | --- | --- |
+| phone | Number | 是 | e164格式的手机号码，例：中国手机号码 -- `+861327722xxxx` |
+
+**Response**
+
+```typescript
+// 200 <EMPTY RESPONSE>
+
+// 422 code: REGISTERED 已注册
+```
+
+##### Auth.Register.withPhoneCode
+
+使用手机号码及验证码完成注册
+
+**Body 参数**
+
+| 名称 | 类型 | 必填 | 描述 | 
+| --- | --- | --- | --- |
+| phone | Number | 是 | e164格式的手机号码，例：中国手机号码 -- `+861327722xxxx` |
+| code | Number | 是 | 手机上收到的验证码 |
+
+**Response**
+
+```typescript
+// 200 注册成功， AuthSuccessResponse
+
+// 422 code: REGISTERED
+
+// 422 code: INVALID_CODE
+```
+
+#### 登录
+
+登录方式有两种，分别是 "验证码登录" 与 "密码登录"
+
+使用"验证码登录"时，需要先调用请求验证码登录的接口，再验证验证码
+
+##### Auth.Login.sendPhoneCode
+
+请求登录验证码
+
+[POST] `/api/auth/login/send_phone_code`
+
+**Body 参数**
+
+| 名称 | 类型 | 必填 | 描述 | 
+| --- | --- | --- | --- |
+| phone | Number | 是 | e164格式的手机号码，例：中国手机号码 -- `+861327722xxxx` |
+
+**Response**
+
+```typescript
+// 200 <EMPTY RESPONSE>
+
+// 422 code: VALIDATION_FAILED
+```
+
+##### Auth.Login.withPhoneCode
+
+使用验证码进行登录
+
+[POST] `/api/auth/login/with_phone_code`
+
+**Body 参数**
+
+| 名称 | 类型 | 必填 | 描述 | 
+| --- | --- | --- | --- |
+| phone | Number | 是 | e164格式的手机号码，例：中国手机号码 -- `+861327722xxxx` |
+| code | Number | 是 | 手机上收到的验证码 |
+
+**Response**
+
+```typescript
+// 200 登录成功， AuthSuccessResponse
+
+// 422 code: INVALID_CODE 
+
+// 422 code: VALIDATION_FAILED
+
+```
+
+##### Auth.Login.withPhonePassword
+
+使用验证码登录，一般用于测试账号的登录
+
+[POST] `/api/auth/login/with_phone_password`
+
+**Body 参数**
+
+| 名称 | 类型 | 必填 | 描述 | 
+| --- | --- | --- | --- |
+| phone | Number | 是 | e164格式的手机号码，例：中国手机号码 -- `+861327722xxxx` |
+| password | String | 是 | 账号密码 |
+
+**Response**
+
+```typescript
+// 200 登录成功， AuthSuccessResponse
+
+// 422 code: INVALID_CREDENTIALS 账号或密码不正确 
+
+// 422 code: VALIDATION_FAILED
+
+```

@@ -109,7 +109,8 @@ class LoginController extends Controller
 
         if ($cachedCode !== $validatedData['code']) {
             return response()->json([
-                'code' => 'INVALID_CODE'
+                'code' => 'INVALID_CODE',
+                'message' => '验证码错误'
             ], 422);
         }
 
