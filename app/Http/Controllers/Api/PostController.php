@@ -22,7 +22,12 @@ class PostController extends Controller
      * @return mixed
      */
     public function view($id) {
-        $post = Post::with('like')->findOrFail($id);
+        $userId = auth()->id();
+        $post = Post::with([
+            'like' => function($query) use ($userId) {
+                $query->where('post_likes.user_id', $userId);
+            }
+        ])->findOrFail($id);
         return new PostResource($post);
     }
 
