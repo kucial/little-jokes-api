@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Channels\DySMSChannel;
 use App\Http\Controllers\Controller;
 use App\Notifications\PhoneLogin;
 use App\User;
@@ -83,7 +84,7 @@ class LoginController extends Controller
         });
 
         // send code
-        Notification::route('twilio', $validatedData['phone'])
+        Notification::route('dysms', $validatedData['phone'])
             ->notify(new PhoneLogin($code));
 
         if (env('APP_DEBUG')) {

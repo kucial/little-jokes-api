@@ -41,4 +41,8 @@ return [
         'client_secret' => env('WEIXINWEB_CLIENT_SECRET'),
         'redirect' => env('WEIXINWEB_REDIRECT_URI')
     ],
+
+    'aliyun' => [
+        'access_key' => env('')
+    ]
 ];

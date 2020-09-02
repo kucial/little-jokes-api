@@ -39,7 +39,7 @@ class RegisterController extends Controller
         );
 
         // send code
-        Notification::route('twilio', $validatedData['phone'])
+        Notification::route('dysms', $validatedData['phone'])
             ->notify(new PhoneRegister($code));
 
         if (env('APP_DEBUG')) {

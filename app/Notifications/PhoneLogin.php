@@ -2,10 +2,12 @@
 
 namespace App\Notifications;
 
+use App\Channels\DySMSChannel;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Arr;
 use NotificationChannels\Twilio\TwilioChannel;
 use NotificationChannels\Twilio\TwilioSmsMessage;
 
@@ -33,7 +35,14 @@ class PhoneLogin extends Notification
      */
     public function via($notifiable)
     {
-        return [TwilioChannel::class];
+        $channels = [];
+        if (Arr::exists($notifiable->routes, 'dysms')) {
+            $channels[] = DySMSChannel::class;
+        }
+        if (Arr::exists($notifiable->routes, 'twilio')) {
+            $channels[] = TwilioChannel::class;
+        }
+        return $channels;
     }
 
     /**
@@ -67,6 +76,14 @@ class PhoneLogin extends Notification
     {
         return (new TwilioSmsMessage())
             ->content($this->getMessage());
+    }
+
+    public function toDySMS()
+    {
+        return [
+            'template' => env('DYSMS_LOGIN_CODE_TEMPLATE'),
+            'code' => $this->code
+        ];
     }
 
     protected function getMessage() {
