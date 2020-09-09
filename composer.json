@@ -15,8 +15,10 @@
         "guzzlehttp/guzzle": "^6.3",
         "laravel-notification-channels/twilio": "^3.0",
         "laravel/framework": "^6.0",
+        "laravel/sanctum": "^2.6",
         "laravel/tinker": "^1.0",
         "overtrue/laravel-wechat": "~5.0",
+        "socialiteproviders/github": "^1.0",
         "socialiteproviders/weixin": "^4.0",
         "socialiteproviders/weixin-web": "^3.1"
     },
