@@ -160,10 +160,9 @@ class PostController extends Controller
      * @param $id
      * @return PostVoteResource
      */
-    public function vote(Request $request, $id)
+    public function vote(Request $request, int $id)
     {
         $user = auth()->user();
-
         $validatedDate = $request->validate([
             'vote_type' => [
                 'required',
@@ -174,9 +173,9 @@ class PostController extends Controller
             ]
         ]);
 
-        $vote = PostVote::where('user_id', $user->getKey())
-            ->where('post_id', $id)
-            ->firstOrNew();
+        $vote = PostVote::firstOrNew(
+                ['user_id' => $user->getKey(), 'post_id' => $id]
+            );
 
         if ($vote->id) {
             if ($vote->vote_type !== $validatedDate['vote_type']) {
@@ -185,8 +184,6 @@ class PostController extends Controller
             }
         } else {
             $vote->vote_type = $validatedDate['vote_type'];
-            $vote->post_id = $id;
-            $vote->user_id = $user->getKey();
             $vote->save();
         }
 
