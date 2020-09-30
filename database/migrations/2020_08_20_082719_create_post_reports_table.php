@@ -14,7 +14,8 @@ class CreatePostReportsTable extends Migration
     public function up()
     {
         Schema::create('post_reports', function (Blueprint $table) {
-            $table->id();
+            // $table->id();
+            $table->bigIncrements('id');
             $table->unsignedBigInteger('post_id');
             $table->unsignedBigInteger('user_id');
             $table->text('description');
