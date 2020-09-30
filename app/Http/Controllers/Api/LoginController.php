@@ -52,8 +52,8 @@ class LoginController extends Controller
             'code' => 'required',
         ]);
 
-        $cachedCode = Cache::get(
-            $this->getCacheKey($validatedData['phone']));
+        $cacheKey = $this->getCacheKey($validatedData['phone']);
+        $cachedCode = Cache::get($cacheKey);
 
         if ($cachedCode !== $validatedData['code']) {
             return response()->json([
@@ -61,6 +61,8 @@ class LoginController extends Controller
                 'message' => '验证码错误'
             ], 422);
         }
+
+        Cache::forget($cacheKey);
 
         $user = User::where('mobile', $validatedData['phone'])->first();
 

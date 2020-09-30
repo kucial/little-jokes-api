@@ -73,7 +73,8 @@ class RegisterController extends Controller
         }
 
         // verify;
-        $cachedCode = Cache::get('register.'.$validatedData['phone']);
+        $cacheKey = $this->getCacheKey($validatedData['phone']);
+        $cachedCode = Cache::get($cacheKey);
 
         if ($cachedCode !== $validatedData['code']) {
             return response()->json([
@@ -81,6 +82,8 @@ class RegisterController extends Controller
                 'message' => '验证码不正确'
             ], 422);
         }
+
+        Cache::forget($cacheKey);
 
         $user = new User();
         $user->mobile = $validatedData['phone'];
