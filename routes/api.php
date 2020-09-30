@@ -68,4 +68,5 @@ Route::group([
 
     Route::post('/register/send_phone_code', 'RegisterController@sendCode');
     Route::post('/register/with_phone_code', 'RegisterController@phoneRegister');
+    Route::post('/register/with_phone_password', 'RegisterController@withPhonePassword');
 });

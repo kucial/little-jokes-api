@@ -96,15 +96,48 @@ class RegisterController extends Controller
         $user->name = $validatedData['phone'];
         $user->save();
 
-          return (new UserResource($user))->additional(['meta' => [
-                'api_token' => $user->api_token,
-            ]]);
+        return (new UserResource($user))->additional(['meta' => [
+            'api_token' => $user->api_token,
+        ]]);
 
     }
 
     protected function getCacheKey($phone)
     {
         return 'register.'.$phone;
+    }
+
+    public function withPhonePassword(Request $request) {
+        $validatedData = $request->validate([
+            'phone' => 'required'
+        ]);
+
+        $exists = DB::table('users')->where('mobile', $validatedData['phone'])
+            ->exists();
+
+        if ($exists) {
+            return response()->json([
+                'code' => 'REGISTERED',
+                'message' => '手机号码已注册'
+            ], 422);
+        }
+        $validatedData = $request->validate([
+            'phone' => 'required', // should be E164 phone number
+            'password' => 'required',
+            'region' => 'sometimes|default:CN'
+        ]);
+
+        $user = new User();
+        $user->mobile = $validatedData['phone'];
+        $user->password = $validatedData['password'];
+        // $user->region = $validatedData['region'];
+        $user->api_token = User::generateToken();
+        $user->name = $validatedData['phone'];
+        $user->save();
+
+        return (new UserResource($user))->additional(['meta' => [
+            'api_token' => $user->api_token,
+        ]]);
     }
 
 }
