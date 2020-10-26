@@ -22,5 +22,10 @@ class PostPolicy
         return $post->reports()->where('user_id', $user->id)->doesntExist();
     }
 
+    public function edit(User $user, Post $post)
+    {
+        return $post->user_id === $user->id;
+    }
+
 
 }

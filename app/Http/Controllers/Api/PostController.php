@@ -15,7 +15,9 @@ use Illuminate\Validation\Rule;
 
 class PostController extends Controller
 {
-
+    /**
+     * Create Post
+     */
     public function create(Request $request) {
         $userId = auth()->id();
         $validatedData = $request->validate([
@@ -26,6 +28,50 @@ class PostController extends Controller
         $post->user_id = $userId;
         $post->save();
         return new PostResource($post);
+    }
+
+    /**
+     * 更新 Post
+     */
+    public function update(Request $request, $id) {
+        $user = auth()->user();
+        $post = Post::findOrFail($id);
+        if ($user->can('edit', $post)) {
+            $validatedData = $request->validate([
+                'content' => 'required|max:255'
+            ]);
+            $post->content = $validatedData['content'];
+            $post->save();
+            return new PostResource($post);
+        } else {
+            return response()->json([
+                'code' => 'NOT_AUTHORIZED',
+                'message' => 'You are not authorized to do this action.'
+            ], 403);
+        }
+    }
+
+    /**
+     *  Delete Post
+     */
+    public function delete(Request $request, $id) {
+        $user = auth()->user();
+        $post = Post::findOrFail($id);
+        if ($user->can('edit', $post)) {
+            $post->delete();  // soft delete, update `blocked_at`
+            return response()->json([
+                'message' => 'Post deleted',
+                'data' => [
+                    'id' => $post->id,
+                ]
+            ]);
+            return new PostResource($post);
+        } else {
+            return response()->json([
+                'code' => 'NOT_AUTHORIZED',
+                'message' => 'You are not authorized to do this action.'
+            ], 403);
+        }
     }
 
     /**
@@ -132,6 +178,22 @@ class PostController extends Controller
             ->where('post_likes.user_id', $userId)
             ->paginate($pageSize);
 
+        return PostResource::collection($posts);
+    }
+
+    /**
+     * 用户列表
+     */
+    public function userPosts(Request $request, $userId)
+    {
+        $pageSize = (int) $request->query('page_size', 20);
+        $posts = Post::with([
+            'like' => function ($query) use($userId) {
+                $query->where('post_likes.user_id', $userId);
+            }
+        ])->where('posts.user_id', $userId)
+        ->orderBy('created_at', 'desc')
+        ->paginate($pageSize);
         return PostResource::collection($posts);
     }
 

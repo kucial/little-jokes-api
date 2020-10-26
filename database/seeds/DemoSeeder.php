@@ -21,6 +21,7 @@ class DemoSeeder extends Seeder
         \App\Post::truncate();
         foreach ($data['jokes'] as $item) {
             $post = new \App\Post();
+            $post->user_id = 1;
             $post->content = $item;
             $post->save();
         }

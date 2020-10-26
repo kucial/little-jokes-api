@@ -10,6 +10,9 @@ use Illuminate\Support\Facades\DB;
 
 class FeedController extends Controller
 {
+    /**
+     * 最新的 Post
+     */
     public function latest(Request $request)
     {
         $pageSize = (int) $request->query('page_size', 20);
@@ -24,6 +27,9 @@ class FeedController extends Controller
         return PostResource::collection($posts);
     }
 
+    /**
+     * 随机获取 Post
+     */
     public function random(Request $request)
     {
         $request->validate([
@@ -70,4 +76,5 @@ class FeedController extends Controller
         )->orderBy('post_scores.score', 'desc')->paginate($pageSize);
         return PostResource::collection($posts);
     }
+
 }

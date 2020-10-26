@@ -1,3 +1,4 @@
+
 <?php
 
 use Illuminate\Http\Request;
@@ -22,9 +23,12 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::group([
     'prefix' => 'posts',
 ], function() {
-    Route::post('/', 'PostController@create')->name('posts.create');
     Route::get('/{id}', 'PostController@view')->name('posts.detail');
     Route::middleware('auth:api')->group(function() {
+        Route::post('/', 'PostController@create')->name('posts.create');
+        Route::put('/{id}', 'PostController@update')->name('posts.update');
+        Route::delete('/{id}', 'PostController@delete')->name('posts.delete');
+
         Route::post('/{id}/_like', 'PostController@like')->name('posts.like');
         Route::post('/{id}/_unlike', 'PostController@unlike')->name('posts.unlike');
         Route::post('/{id}/_report', 'PostController@report')->name('posts.report');
@@ -33,6 +37,7 @@ Route::group([
 });
 
 Route::middleware('auth:api')->get('/users/{id}/liked-posts', 'PostController@userLiked')->name('users.liked-posts');
+Route::get('/users/{id}/posts', 'PostController@userPosts')->name('users.posts');
 
 Route::group([
     'middleware' => 'auth:api'
