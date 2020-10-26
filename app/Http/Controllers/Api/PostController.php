@@ -15,6 +15,19 @@ use Illuminate\Validation\Rule;
 
 class PostController extends Controller
 {
+
+    public function create(Request $request) {
+        $userId = auth()->id();
+        $validatedData = $request->validate([
+            'content' => 'required|max:255'
+        ]);
+        $post = new Post();
+        $post->content = $validatedData['content'];
+        $post->user_id = $userId;
+        $post->save();
+        return new PostResource($post);
+    }
+
     /**
      * Get Post Detail
      *

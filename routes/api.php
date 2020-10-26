@@ -22,6 +22,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::group([
     'prefix' => 'posts',
 ], function() {
+    Route::post('/', 'PostController@create')->name('posts.create');
     Route::get('/{id}', 'PostController@view')->name('posts.detail');
     Route::middleware('auth:api')->group(function() {
         Route::post('/{id}/_like', 'PostController@like')->name('posts.like');
