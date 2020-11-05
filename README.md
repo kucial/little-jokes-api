@@ -9,6 +9,7 @@
 - 用户认证
     - 注册、登录
 - Post
+    - 增删改查
     - 获取文章（笑话）
     - 收藏、取消收藏
     - 内容举报
@@ -84,11 +85,15 @@ Postman collection 地址：https://www.postman.com/collections/ecae4bac5f42feba
 | 名称 | 描述 | 地址 |
 | --- | --- |  --- |
 | [Post.get](#postget) | 获取文章内容 |  GET `/api/posts/{id}` |
+| [Post.create](#postcreate) | 创建文章 |  POST `/api/posts/` |
+| [Post.update](#postupdate) | 创建文章 |  PUT `/api/posts/{id}` |
+| [Post.delete](#postdelete) | 创建文章 |  DELETE `/api/posts/{id}` |
 | [Post.like](#postlike) | 收藏文章 | POST `/api/posts/{id}/_like` |
 | [Post.unlike](#postunlike) | 取消收藏文章 | POST `/api/posts/{id}/_unlike` |
 | [Post.report](#postreport) | 举报文章 | POST `/api/posts/{id}/_report` |
 | [Post.vote](#postvote) | 投票 | POST `/api/posts/{id}/_vote` |
 | [Post.userLiked](#postuserliked) | 用户收藏列表 | GET `/api/users/{id}/liked-posts` |
+| [Post.ofUser](#postuserliked) | 用户创建的文章列表 | GET `/api/users/{id}/posts` |
 | | | |
 | [PostLike.archive](#postlikearchive) | 归档收藏记录 | POST `/api/likes/{id}/_archive` |
 | [PostLike.archive](#postlikeunarchive) | 取消归档收藏记录 | POST `/api/likes/{id}/_unarchive` |
@@ -178,6 +183,88 @@ GET `/api/posts/{id}`,
 interface PostResource {
     data: Post,
 }
+```
+
+---
+
+#### Post.create
+
+创建文章
+
+POST `/api/posts`
+
+**Body 参数**
+| 名称 ｜ 类型 ｜ 必填 ｜ 描述 ｜
+| --- | --- | --- | --- |
+| content | string | 是 | 内容 |
+
+**Response**
+
+```typescript
+// 200
+interface PostResource {
+    data: Post,
+}
+```
+
+---
+
+#### Post.update
+
+更新文章
+
+PUT `/api/posts/{id}`
+
+**Path 参数**
+
+| 名称 | 类型 | 必填 | 描述 | 
+| --- | --- | --- | --- |
+| id | Number | 是 | 文章ID |
+
+**Body 参数**
+| 名称 ｜ 类型 ｜ 必填 ｜ 描述 ｜
+| --- | --- | --- | --- |
+| content | string | 是 | 内容 |
+
+**Response**
+
+```typescript
+// 200
+interface PostResource {
+    data: Post,
+}
+
+// 422 VALIDATION_EXCEPTION
+```
+
+--- 
+
+#### Post.delete
+
+删除文章
+
+DELETE `/api/posts/{id}`
+
+**Path 参数**
+
+| 名称 | 类型 | 必填 | 描述 | 
+| --- | --- | --- | --- |
+| id | Number | 是 | 文章ID |
+
+**Response**
+
+```typescript
+// 200
+interface StatusResponse {
+    messsage: 'Post deleted',
+    data: {
+        id: PostId,
+    }
+}
+
+// 404 RESOURCE_NOT_FOUND
+
+// 403 NOT_AUTHORIZED
 ```
 
 ---
@@ -317,9 +404,32 @@ enum VoteType {
 
 #### Post.userLiked 
 
-获取用户收获的文章列表。权限：
+获取用户收获的文章列表。
 
 GET `/api/users/{id}/liked-posts`
+
+**Query 参数**
+
+| 名称 | 类型 | 必填 | 描述 | 
+| --- | --- | --- | --- |
+| page | Number | 否 | 页码，默认值： `1`|
+| page_size | Number | 否 | 分页大小，默认值： `20`|
+
+**Response**
+
+```typescript
+// 200 CollectionResponse<PostResource>
+
+// 403 code: NOT_AUTHORIZED
+```
+
+---
+
+#### Post.ofUser
+
+获取用户创建的文章列表
+
+GET `/api/users/{id}/posts`
 
 **Query 参数**
 
