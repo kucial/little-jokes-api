@@ -71,9 +71,9 @@ class FeedController extends Controller
             }
         ])->leftJoinSub($recentScores, 'post_scores', function($join) {
             $join->on('posts.id', '=', 'post_scores.post_id');
-        })->select(
-            ['posts.*', 'post_scores.score']
-        )->orderBy('post_scores.score', 'desc')->paginate($pageSize);
+        })->selectRaw(
+            'posts.*, IFNULL(post_scores.score, 0) as score'
+        )->orderBy('score', 'desc')->paginate($pageSize);
         return PostResource::collection($posts);
     }
 
