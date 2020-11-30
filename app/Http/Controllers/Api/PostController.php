@@ -21,7 +21,7 @@ class PostController extends Controller
     public function create(Request $request) {
         $userId = auth()->id();
         $validatedData = $request->validate([
-            'content' => 'required|max:255'
+            'content' => 'required|max:2000'
         ]);
         $post = new Post();
         $post->content = $validatedData['content'];
@@ -38,7 +38,7 @@ class PostController extends Controller
         $post = Post::findOrFail($id);
         if ($user->can('edit', $post)) {
             $validatedData = $request->validate([
-                'content' => 'required|max:255'
+                'content' => 'required|max:2000'
             ]);
             $post->content = $validatedData['content'];
             $post->save();
