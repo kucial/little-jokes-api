@@ -5,6 +5,7 @@ namespace App\Console;
 use App\Console\Commands\SendLoginSMS;
 use App\Console\Commands\SendRegisterSMS;
 use App\Console\Commands\SendSMS;
+use App\Console\Commands\T2SUpdate;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -19,6 +20,7 @@ class Kernel extends ConsoleKernel
         SendSMS::class,
         SendRegisterSMS::class,
         SendLoginSMS::class,
+        T2SUpdate::class,
     ];
 
     /**

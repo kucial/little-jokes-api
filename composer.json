@@ -18,6 +18,7 @@
         "laravel/sanctum": "^2.6",
         "laravel/tinker": "^1.0",
         "overtrue/laravel-wechat": "~5.0",
+        "sleep-cat/opencc-php": "^3.2",
         "socialiteproviders/github": "^1.0",
         "socialiteproviders/weixin": "^4.0",
         "socialiteproviders/weixin-web": "^3.1"
@@ -66,5 +67,11 @@
         "post-create-project-cmd": [
             "@php artisan key:generate --ansi"
         ]
+    },
+    "repositories": {
+        "packagist": {
+            "type": "composer",
+            "url": "https://mirrors.aliyun.com/composer/"
+        }
     }
 }

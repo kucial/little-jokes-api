@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e7cb26da60cf320b96332918113de4f5",
+    "content-hash": "b84d6e457396ffdb5c5b0b35d5b2287a",
     "packages": [
         {
             "name": "adbario/php-dot-notation",
@@ -2568,12 +2568,12 @@
             "version": "4.2.33",
             "source": {
                 "type": "git",
-                "url": "https://github.com/overtrue/wechat.git",
+                "url": "https://github.com/w7corp/easywechat.git",
                 "reference": "80dbb941a3a607adf42948b8b6da58f26de5ca7e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/overtrue/wechat/zipball/80dbb941a3a607adf42948b8b6da58f26de5ca7e",
+                "url": "https://api.github.com/repos/w7corp/easywechat/zipball/80dbb941a3a607adf42948b8b6da58f26de5ca7e",
                 "reference": "80dbb941a3a607adf42948b8b6da58f26de5ca7e",
                 "shasum": "",
                 "mirrors": [
@@ -3292,6 +3292,66 @@
                 "uuid"
             ],
             "time": "2020-02-21T04:36:14+00:00"
+        },
+        {
+            "name": "sleep-cat/opencc-php",
+            "version": "v3.2.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/alphasnow/opencc-php.git",
+                "reference": "e03aee573b389302d74d2223f3df5445d1d84583"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/alphasnow/opencc-php/zipball/e03aee573b389302d74d2223f3df5445d1d84583",
+                "reference": "e03aee573b389302d74d2223f3df5445d1d84583",
+                "shasum": "",
+                "mirrors": [
+                    {
+                        "url": "https://mirrors.aliyun.com/composer/dists/%package%/%reference%.%type%",
+                        "preferred": true
+                    }
+                ]
+            },
+            "require": {
+                "php": "^7.2",
+                "symfony/process": "^4.3.4"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^6.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "SleepCat\\OpenCC\\ServiceProvider"
+                    ],
+                    "aliases": {
+                        "OpenCC": "SleepCat\\OpenCC\\Facade"
+                    }
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "SleepCat\\OpenCC\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "sleep-cat",
+                    "email": "wind91@foxmail.com"
+                }
+            ],
+            "description": "OpenCC made with PHP",
+            "keywords": [
+                "OpenCC",
+                "php"
+            ],
+            "time": "2019-10-23T06:22:56+00:00"
         },
         {
             "name": "socialiteproviders/github",
@@ -7742,5 +7802,6 @@
     "platform": {
         "php": "^7.2"
     },
-    "platform-dev": []
+    "platform-dev": [],
+    "plugin-api-version": "1.1.0"
 }

@@ -24,7 +24,8 @@ class PostController extends Controller
             'content' => 'required|max:2000'
         ]);
         $post = new Post();
-        $post->content = $validatedData['content'];
+
+        $post->content = \OpenCC::transform($validatedData['content'], 't2s.json');
         $post->user_id = $userId;
         $post->save();
         return new PostResource($post);
@@ -40,7 +41,7 @@ class PostController extends Controller
             $validatedData = $request->validate([
                 'content' => 'required|max:2000'
             ]);
-            $post->content = $validatedData['content'];
+            $post->content = \OpenCC::transform($validatedData['content'], 't2s.json');
             $post->save();
             return new PostResource($post);
         } else {
