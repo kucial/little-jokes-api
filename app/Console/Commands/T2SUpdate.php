@@ -28,6 +28,15 @@ class T2SUpdate extends Command
     public function __construct()
     {
         parent::__construct();
+    }
+
+    /**
+     * Execute the console command.
+     *
+     * @return mixed
+     */
+    public function handle()
+    {
         $opencc = app()->make('opencc');
         \App\Post::chunk(200, function ($posts) use($opencc) {
             foreach($posts as $post) {
@@ -40,15 +49,5 @@ class T2SUpdate extends Command
                 $post->save();
             }
         });
-    }
-
-    /**
-     * Execute the console command.
-     *
-     * @return mixed
-     */
-    public function handle()
-    {
-        //
     }
 }
