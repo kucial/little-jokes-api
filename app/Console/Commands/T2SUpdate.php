@@ -41,8 +41,8 @@ class T2SUpdate extends Command
         \App\Post::chunk(200, function ($posts) use($opencc) {
             foreach($posts as $post) {
                 $s = $opencc->transform($post->content, 't2s.json');
-                if($s !== $post->content) {
-                    $this->info($s);
+                if($s && $s !== $post->content) {
+                    $this->info('update', $post->id, $s);
                 }
                 $post->content = $s;
                 $post->timestamps = false;
