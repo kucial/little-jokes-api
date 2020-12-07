@@ -6,6 +6,7 @@ use App\Console\Commands\SendLoginSMS;
 use App\Console\Commands\SendRegisterSMS;
 use App\Console\Commands\SendSMS;
 use App\Console\Commands\T2SUpdate;
+use App\Console\Commands\DbBackup;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -32,6 +33,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         // $schedule->command('inspire')->hourly();
+        $schedule->command('db:backup')->daily();
     }
 
     /**
