@@ -50,7 +50,7 @@ class PostController extends Controller
                 'content' => 'required|max:2000'
             ]);
 
-            foreach ($$validatedData as $key => $value) {
+            foreach ($validatedData as $key => $value) {
                 $post->$key = $this->t2s($value);
             }
             $post->save();
