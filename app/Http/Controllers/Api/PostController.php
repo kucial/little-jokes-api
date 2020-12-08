@@ -11,21 +11,28 @@ use Illuminate\Http\Request;
 use App\Http\Resources\Post as PostResource;
 use App\Http\Resources\PostReport as PostReportResource;
 use App\Http\Resources\PostVote as PostVoteResource;
+use Illuminate\Support\Arr;
 use Illuminate\Validation\Rule;
 
 class PostController extends Controller
 {
+
+    private function t2s($text) {
+        return \OpenCC::transform($text, 't2s.json');
+    }
     /**
      * Create Post
      */
     public function create(Request $request) {
         $userId = auth()->id();
         $validatedData = $request->validate([
+            'title' => 'sometimes|max:200',
             'content' => 'required|max:2000'
         ]);
         $post = new Post();
 
-        $post->content = \OpenCC::transform($validatedData['content'], 't2s.json');
+        $post->title = $this->t2s(Arr::get($validatedData, 'title', ''));
+        $post->content = $this->t2s($validatedData['content']);
         $post->user_id = $userId;
         $post->save();
         return new PostResource($post);
@@ -39,9 +46,13 @@ class PostController extends Controller
         $post = Post::findOrFail($id);
         if ($user->can('edit', $post)) {
             $validatedData = $request->validate([
+                'title' => 'sometimes|max:200',
                 'content' => 'required|max:2000'
             ]);
-            $post->content = \OpenCC::transform($validatedData['content'], 't2s.json');
+
+            foreach ($$validatedData as $key => $value) {
+                $post->$key = $this->t2s($value);
+            }
             $post->save();
             return new PostResource($post);
         } else {
