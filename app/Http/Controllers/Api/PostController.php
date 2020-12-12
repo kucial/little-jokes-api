@@ -277,4 +277,18 @@ class PostController extends Controller
         return new PostVoteResource($vote);
 
     }
+
+    public function search(Request $request) {
+        $keyword = $request->query('q');
+        $userId = auth()->id();
+        $pageSize = $request->query('page_size', 20);
+        $posts = Post::with([
+            'like' => function ($query) use($userId) {
+                $query->where('post_likes.user_id', $userId);
+            }
+        ])->where('content', 'like', '%'.$keyword.'%')
+            ->orderBy('created_at', 'desc')
+            ->paginate($pageSize);
+        return PostResource::collection($posts);
+    }
 }

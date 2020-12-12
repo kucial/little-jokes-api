@@ -15,6 +15,7 @@
     - 收藏、取消收藏
     - 内容举报
     - 用户收藏列表
+- 搜索
 - 收藏管理 
     - 归档、取消归档
 - 数据库备份
@@ -110,6 +111,8 @@ Postman collection 地址：https://www.postman.com/collections/ecae4bac5f42feba
 | [Auth.Login.sendPhoneCode](#authloginsendphonecode) | 发送登录验证码 | POST `/api/auth/login/send_phone_code` |
 | [Auth.Login.withPhoneCode](#authloginwithphonecode) | 手机验证码登录 | POST `/api/auth/login/with_phone_code` |
 | [Auth.Login.withPhonePassword](#authloginwithphonepassword) | 手机密码登录 | POST `/api/auth/login/with_phone_password` |
+| | | |
+| [Search](#search) | 搜索 | GET `/api/search` |
 
 
 ### API 公共规范
@@ -743,3 +746,19 @@ interface AuthSuccessResponse {
 // 422 code: VALIDATION_FAILED
 
 ```
+
+--- 
+
+#### Search
+
+搜索内容
+
+[GET] `/api/search`
+
+**Query 参数**
+
+| 名称 | 类型 |描述 | 
+| --- | --- | --- |
+| page | Number? | 页码，默认值： `1`|
+| page_size | Number? | 分页大小，默认值： `20`|
+｜q | String | 关键词 |
