@@ -39,6 +39,7 @@ Route::group([
 });
 
 Route::middleware('auth:api')->get('/users/{id}/liked-posts', 'PostController@userLiked')->name('users.liked-posts');
+Route::middleware('auth:api')->get('/users/me', 'UserController@me')->name('users.me');
 Route::get('/users/{id}/posts', 'PostController@userPosts')->name('users.posts');
 
 Route::group([
