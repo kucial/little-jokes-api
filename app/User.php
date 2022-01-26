@@ -41,26 +41,29 @@ class User extends Authenticatable
         'mobile_verified_at' => 'datetime'
     ];
 
-    static public function generateToken() {
+    static public function generateToken()
+    {
         return Str::random(60);
     }
 
-    public function setPasswordAttribute($value) {
+    public function setPasswordAttribute($value)
+    {
         $this->attributes['password'] = Hash::make($value);
     }
 
-    public function likedPosts() {
+    public function likedPosts()
+    {
         $userId = $this->id;
         return $this->belongsToMany(Post::class, 'post_likes')
             ->with([
-                'like' => function ($query) use($userId) {
+                'like' => function ($query) use ($userId) {
                     $query->where('user_id', $userId);
                 }
             ]);
     }
 
-    public function portReports() {
+    public function postReports()
+    {
         return $this->hasMany(PostReport::class);
     }
-
 }
