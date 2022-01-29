@@ -2,11 +2,11 @@
 
 namespace App\Exceptions;
 
+use Throwable;
 use Illuminate\Support\Arr;
 use Illuminate\Auth\AuthenticationException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
-use Exception;
 use Illuminate\Validation\ValidationException;
 
 class Handler extends ExceptionHandler
@@ -33,10 +33,10 @@ class Handler extends ExceptionHandler
     /**
      * Report or log an exception.
      *
-     * @param  \Exception  $exception
+     * @param  \Throwable  $exception
      * @return void
      */
-    public function report(Exception $exception)
+    public function report(Throwable $exception)
     {
         parent::report($exception);
     }
@@ -45,10 +45,10 @@ class Handler extends ExceptionHandler
      * Render an exception into an HTTP response.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \Exception  $exception
+     * @param  \Throwable  $exception
      * @return \Illuminate\Http\Response
      */
-    public function render($request, Exception $exception)
+    public function render($request, Throwable $exception)
     {
         return parent::render($request, $exception);
     }
@@ -90,10 +90,10 @@ class Handler extends ExceptionHandler
     /**
      * Convert the given exception to an array.
      *
-     * @param  \Exception  $e
+     * @param  Throwable  $e
      * @return array
      */
-    protected function convertExceptionToArray(Exception $e)
+    protected function convertExceptionToArray(Throwable $e)
     {
         return config('app.debug') ? [
             'code' => $this->getErrorCode($e),
@@ -110,7 +110,7 @@ class Handler extends ExceptionHandler
         ];
     }
 
-    protected function getErrorCode(Exception $e)
+    protected function getErrorCode(Throwable $e)
     {
         if ($e instanceof NotFoundHttpException) {
             return 'RESOURCE_NOT_FOUND';
