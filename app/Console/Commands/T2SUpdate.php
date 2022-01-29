@@ -11,7 +11,7 @@ class T2SUpdate extends Command
      *
      * @var string
      */
-    protected $signature = 'post:t2s';
+    protected $signature = 'posts:t2s';
 
     /**
      * The console command description.
@@ -38,10 +38,10 @@ class T2SUpdate extends Command
     public function handle()
     {
         $opencc = app()->make('opencc');
-        \App\Post::chunk(200, function ($posts) use($opencc) {
-            foreach($posts as $post) {
+        \App\Post::chunk(200, function ($posts) use ($opencc) {
+            foreach ($posts as $post) {
                 $s = $opencc->transform($post->content, 't2s.json');
-                if($s && $s !== $post->content) {
+                if ($s && $s !== $post->content) {
                     $this->info('update', $post->id, $s);
                 }
                 $post->content = $s;
