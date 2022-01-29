@@ -24,9 +24,9 @@ Route::get('/search', 'PostController@search')->name('search');
 
 Route::group([
     'prefix' => 'posts',
-], function() {
+], function () {
     Route::get('/{id}', 'PostController@view')->name('posts.detail');
-    Route::middleware('auth:api')->group(function() {
+    Route::middleware('auth:api')->group(function () {
         Route::post('/', 'PostController@create')->name('posts.create');
         Route::put('/{id}', 'PostController@update')->name('posts.update');
         Route::delete('/{id}', 'PostController@delete')->name('posts.delete');
@@ -44,14 +44,14 @@ Route::get('/users/{id}/posts', 'PostController@userPosts')->name('users.posts')
 
 Route::group([
     'middleware' => 'auth:api'
-], function() {
-    Route::prefix('likes')->group(function() {
+], function () {
+    Route::prefix('likes')->group(function () {
         Route::post('/{id}/_archive', 'LikeController@archive')->name('likes.archive');
         Route::post('/{id}/_unarchive', 'LikeController@unArchive')->name('likes.unarchive');
     });
 });
 
-Route::prefix('reports')->group(function() {
+Route::prefix('reports')->group(function () {
     Route::middleware('auth:api')->delete('/{id}', 'PostReportController@delete')->name('reports.delete');
 });
 
@@ -62,18 +62,19 @@ Route::get('/feed/random', 'FeedController@random');
 Route::group([
     'middleware' => 'guest',
     'prefix' => 'register'
-], function() {
-
+], function () {
 });
 
 Route::group([
     'middleware' => 'guest',
     'prefix' => 'auth',
-], function() {
+], function () {
     Route::post('/login/with_phone_password', 'LoginController@withPhonePassword');
     Route::post('/login/with_phone_code', 'LoginController@withPhoneCode');
     Route::post('/login/send_phone_code', 'LoginController@sendCode');
     Route::post('/login/with_oauth_code', 'LoginController@withOauthCode');
+
+    Route::post('/login/with_google_id_token', 'LoginController@withGoogleIdToken');
 
     Route::post('/register/send_phone_code', 'RegisterController@sendCode');
     Route::post('/register/with_phone_code', 'RegisterController@phoneRegister');

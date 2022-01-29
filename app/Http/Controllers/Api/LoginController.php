@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
+use Google\Client as GoogleClient;
 
 class LoginController extends Controller
 {
@@ -26,7 +27,7 @@ class LoginController extends Controller
         $validatedData = $request->validate([
             'phone' => 'required|exists:users,mobile'
         ]);
-        $code = Cache::remember($this->getCacheKey($validatedData['phone']), env('LOGIN_CODE_TTL'), function() {
+        $code = Cache::remember($this->getCacheKey($validatedData['phone']), env('LOGIN_CODE_TTL'), function () {
             return strval(mt_rand(100000, 999999));
         });
 
@@ -86,12 +87,11 @@ class LoginController extends Controller
             'code' => 'INVALID_CREDENTIALS',
             'message' => '账号或密码不正确'
         ], 403);
-
     }
 
     protected function getCacheKey($phone)
     {
-        return 'login.'.$phone;
+        return 'login.' . $phone;
     }
 
     protected function loginSuccess($user)
@@ -101,10 +101,10 @@ class LoginController extends Controller
         ]]);
     }
 
-//    public function getGithubAuthorizeLink()
-//    {
-//        dd(Socialite::driver('github')->redirect());
-//    }
+    //    public function getGithubAuthorizeLink()
+    //    {
+    //        dd(Socialite::driver('github')->redirect());
+    //    }
 
     public function withOauthCode(Request $request)
     {
@@ -112,7 +112,7 @@ class LoginController extends Controller
         $oauthUser = Socialite::driver($provider)->stateless()->user();
         switch ($provider) {
             case 'github':
-                Log::info('github user: '. json_encode($oauthUser));
+                Log::info('github user: ' . json_encode($oauthUser));
                 return $this->handleGithubCallback($oauthUser);
             default:
                 return response()->json([
@@ -179,9 +179,35 @@ class LoginController extends Controller
             $user->save();
         }
 
-        return response()->json([
-            'api_token' => $user->api_token,
-            'next' => $request->query('next', '')
+        return $this->loginSuccess($user);
+    }
+
+    public function withGoogleIdToken(Request $request)
+    {
+        $validatedData = $request->validate([
+            'clientId' => 'required',
+            'idToken' => 'required',
         ]);
+        $client = new GoogleClient([
+            'client_id' => $validatedData['clientId'],
+        ]);
+
+        $payload = $client->verifyIdToken($validatedData['idToken']);
+        if ($payload) {
+            $user = User::where('google_open_id', $payload['sub'])->first();
+            if (is_null($user)) {
+                $user = new User();
+                $user->name = $payload['name'];
+                $user->password = $payload['sub'];
+                $user->google_open_id = $payload['sub'];
+                $user->api_token = User::generateToken();
+                $user->save();
+            }
+            return $this->loginSuccess($user);
+        } else {
+            return response()->json([
+                'code' => 'INVALID_TOKEN'
+            ])->status(403);
+        }
     }
 }
