@@ -7,6 +7,7 @@ use App\Console\Commands\SendRegisterSMS;
 use App\Console\Commands\SendSMS;
 use App\Console\Commands\T2SUpdate;
 use App\Console\Commands\DbBackup;
+use App\Console\Commands\GenerateAppleClientSecret;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -22,6 +23,7 @@ class Kernel extends ConsoleKernel
         SendRegisterSMS::class,
         SendLoginSMS::class,
         T2SUpdate::class,
+        GenerateAppleClientSecret::class,
     ];
 
     /**
@@ -43,7 +45,7 @@ class Kernel extends ConsoleKernel
      */
     protected function commands()
     {
-        $this->load(__DIR__.'/Commands');
+        $this->load(__DIR__ . '/Commands');
 
         require base_path('routes/console.php');
     }

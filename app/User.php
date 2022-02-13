@@ -7,6 +7,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Faker\Factory as Faker;
 
 class User extends Authenticatable
 {
@@ -44,6 +45,12 @@ class User extends Authenticatable
     static public function generateToken()
     {
         return Str::random(60);
+    }
+
+    static public function randomName()
+    {
+        $faker = Faker::create('zh_CN');
+        return $faker->name;
     }
 
     public function setPasswordAttribute($value)

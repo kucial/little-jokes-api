@@ -72,9 +72,14 @@ Route::group([
     Route::post('/login/with_phone_password', 'LoginController@withPhonePassword');
     Route::post('/login/with_phone_code', 'LoginController@withPhoneCode');
     Route::post('/login/send_phone_code', 'LoginController@sendCode');
+
+    // Return wechat oauth link, handle redirect in front end.
+    // Route::get('/login/oauth_redirect');
     Route::post('/login/with_oauth_code', 'LoginController@withOauthCode');
 
     Route::post('/login/with_google_id_token', 'LoginController@withGoogleIdToken');
+    Route::post('/login/with_apple', 'LoginController@withAppleId');
+    Route::post('/apple/callback', 'LoginController@handleAppleCallback');
 
     Route::post('/register/send_phone_code', 'RegisterController@sendCode');
     Route::post('/register/with_phone_code', 'RegisterController@phoneRegister');

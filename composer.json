@@ -18,11 +18,13 @@
         "laravel/framework": "^7.0",
         "laravel/sanctum": "^2.6",
         "laravel/tinker": "^2.0",
+        "lcobucci/jwt": "^4.1",
         "overtrue/laravel-wechat": "~5.0",
         "sleep-cat/opencc-php": "^3.2",
-        "socialiteproviders/github": "^1.0",
+        "socialiteproviders/apple": "^5.0",
+        "socialiteproviders/github": "^4.1",
         "socialiteproviders/weixin": "^4.0",
-        "socialiteproviders/weixin-web": "^3.1"
+        "socialiteproviders/weixin-web": "^4.1"
     },
     "require-dev": {
         "facade/ignition": "^2.0",

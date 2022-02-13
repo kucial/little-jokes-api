@@ -16,6 +16,3 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
-
-Route::get('/login/weixin', 'Api\LoginController@redirectToWeixinProvider');
-Route::get('/login/weixin/callback', 'Api\LoginController@handleWeixinProviderCallback');

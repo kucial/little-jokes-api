@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers\Api;
 
+use Illuminate\Support\Facades\Storage;
 use App\Channels\DySMSChannel;
 use App\Http\Controllers\Controller;
 use App\Notifications\PhoneLogin;
 use App\User;
 use App\Http\Resources\User as UserResource;
+use App\Services\AppleToken;
 use Illuminate\Contracts\Hashing\Hasher;
 use Illuminate\Database\Eloquent\Concerns\HasAttributes;
 use Illuminate\Http\Request;
@@ -209,5 +211,82 @@ class LoginController extends Controller
                 'code' => 'INVALID_TOKEN'
             ])->status(403);
         }
+    }
+
+    public function withAppleId(Request $request, AppleToken $appleToken)
+    {
+        $validatedData = $request->validate([
+            'code' => 'required',
+            'openid' => 'sometimes',
+            'clientId' => 'sometimes',
+            'idToken' => 'sometimes',
+        ]);
+
+        try {
+            // $clientSecret = Storage::disk('local')->get('apple_secret');
+            // config()->set('services.apple.client_secret', $clientSecret);
+            config()->set('services.apple.client_secret', $appleToken->generate());
+            $oauthUser = Socialite::driver('apple')->stateless()->user();
+
+
+            // {
+            //     "accessTokenResponseBody": Object {
+            //       "access_token": "a12f31bb3d06e4282af8401e320a50f51.0.rxxq.irFSSQH9I8wMe9DzCiVBDw",
+            //       "expires_in": 3600,
+            //       "id_token": "eyJraWQiOiJlWGF1bm1MIiwiYWxnIjoiUlMyNTYifQ.eyJpc3MiOiJodHRwczovL2FwcGxlaWQuYXBwbGUuY29tIiwiYXVkIjoiY29tLmt1Y2lhbC5saXR0bGUtam9rZXMiLCJleHAiOjE2NDQ4NDczMTMsImlhdCI6MTY0NDc2MDkxMywic3ViIjoiMDAwNzcwLjNmZGYyZmU4MzJiMTQwYjNiNWMxYjJjZjgzYTZmNmFiLjEyNTciLCJub25jZSI6IjU4N2ZlM2QwODc5NmNkY2UzOTc0ZDA1NDUxZjc3YWEwNjY3MTM3OWM2ODVjYWM2MWQxZDIwZmU0NTkzODYxODkiLCJhdF9oYXNoIjoiZXRuTDMtM2MzN3l2TkxPYjFaU3ByQSIsImVtYWlsIjoicmI2amo5Y3Q0aEBwcml2YXRlcmVsYXkuYXBwbGVpZC5jb20iLCJlbWFpbF92ZXJpZmllZCI6InRydWUiLCJpc19wcml2YXRlX2VtYWlsIjoidHJ1ZSIsImF1dGhfdGltZSI6MTY0NDc2MDkxMSwibm9uY2Vfc3VwcG9ydGVkIjp0cnVlfQ.0g0WZwTNFU9uvciaPl9zj7Eext4MOJGa7pWE3yu9rK2rd3v_3eFgm5fMUBNh1opXFAaxo-cnTwKgSOJidmucp7l9zEGch_NC4i8TDbs9EyOSNHWsmM5ij_oad_3sdUAjW383P160fCHCXVY1IiV0emt38uq_anxMA9qBKM9GcPIYIY-WWQhsfpz6zndOMGKTOvPVXVxJ213SbcJzaIJCdJw-kwLuts1QxhKr1mVZIy1-4FXFKHCqzvl9jopT9vTPKMM4ey_Nqi-i4Mp0VZuRerTHBbizgR7oRw9EQ3zSJlNFEVTftQejfBQ11gpNOlGgbj_VKqOfnK51gTRjyI0wTg",
+            //       "refresh_token": "r471400302120413eb1a0ae1faf797065.0.rxxq.nkcL09uvtyVG_GA5vlmnwA",
+            //       "token_type": "Bearer",
+            //     },
+            //     "approvedScopes": null,
+            //     "avatar": null,
+            //     "email": "rb6jj9ct4h@privaterelay.appleid.com",
+            //     "expiresIn": 3600,
+            //     "id": "000770.3fdf2fe832b140b3b5c1b2cf83a6f6ab.1257",
+            //     "name": null,
+            //     "nickname": null,
+            //     "refreshToken": "r471400302120413eb1a0ae1faf797065.0.rxxq.nkcL09uvtyVG_GA5vlmnwA",
+            //     "token": "eyJraWQiOiJlWGF1bm1MIiwiYWxnIjoiUlMyNTYifQ.eyJpc3MiOiJodHRwczovL2FwcGxlaWQuYXBwbGUuY29tIiwiYXVkIjoiY29tLmt1Y2lhbC5saXR0bGUtam9rZXMiLCJleHAiOjE2NDQ4NDczMTMsImlhdCI6MTY0NDc2MDkxMywic3ViIjoiMDAwNzcwLjNmZGYyZmU4MzJiMTQwYjNiNWMxYjJjZjgzYTZmNmFiLjEyNTciLCJub25jZSI6IjU4N2ZlM2QwODc5NmNkY2UzOTc0ZDA1NDUxZjc3YWEwNjY3MTM3OWM2ODVjYWM2MWQxZDIwZmU0NTkzODYxODkiLCJhdF9oYXNoIjoiZXRuTDMtM2MzN3l2TkxPYjFaU3ByQSIsImVtYWlsIjoicmI2amo5Y3Q0aEBwcml2YXRlcmVsYXkuYXBwbGVpZC5jb20iLCJlbWFpbF92ZXJpZmllZCI6InRydWUiLCJpc19wcml2YXRlX2VtYWlsIjoidHJ1ZSIsImF1dGhfdGltZSI6MTY0NDc2MDkxMSwibm9uY2Vfc3VwcG9ydGVkIjp0cnVlfQ.0g0WZwTNFU9uvciaPl9zj7Eext4MOJGa7pWE3yu9rK2rd3v_3eFgm5fMUBNh1opXFAaxo-cnTwKgSOJidmucp7l9zEGch_NC4i8TDbs9EyOSNHWsmM5ij_oad_3sdUAjW383P160fCHCXVY1IiV0emt38uq_anxMA9qBKM9GcPIYIY-WWQhsfpz6zndOMGKTOvPVXVxJ213SbcJzaIJCdJw-kwLuts1QxhKr1mVZIy1-4FXFKHCqzvl9jopT9vTPKMM4ey_Nqi-i4Mp0VZuRerTHBbizgR7oRw9EQ3zSJlNFEVTftQejfBQ11gpNOlGgbj_VKqOfnK51gTRjyI0wTg",
+            //     "user": Object {
+            //       "at_hash": "etnL3-3c37yvNLOb1ZSprA",
+            //       "aud": "com.kucial.little-jokes",
+            //       "auth_time": 1644760911,
+            //       "email": "rb6jj9ct4h@privaterelay.appleid.com",
+            //       "email_verified": "true",
+            //       "exp": 1644847313,
+            //       "iat": 1644760913,
+            //       "is_private_email": "true",
+            //       "iss": "https://appleid.apple.com",
+            //       "nonce": "587fe3d08796cdce3974d05451f77aa06671379c685cac61d1d20fe459386189",
+            //       "nonce_supported": true,
+            //       "sub": "000770.3fdf2fe832b140b3b5c1b2cf83a6f6ab.1257",
+            //     },
+            //   }
+
+            $user = User::where('apple_open_id', $oauthUser->id)->first();
+            if (is_null($user)) {
+                $user = new User();
+                $user->name = $oauthUser->name ?? User::randomName();
+                $user->email = $oauthUser->email;
+                $user->password = $oauthUser->id;
+                $user->apple_open_id = $oauthUser->id;
+                $user->api_token = User::generateToken();
+                $user->save();
+            }
+            return $this->loginSuccess($user);
+        } catch (\Exception $e) {
+            return response()->json([
+                'code' => 'ERROR',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+
+
+
+
+        // dd($oauthUser);
+    }
+
+    public function handleAppleCallback(Request $request)
+    {
     }
 }
