@@ -48,6 +48,7 @@ Route::group([
     Route::prefix('likes')->group(function () {
         Route::post('/{id}/_archive', 'LikeController@archive')->name('likes.archive');
         Route::post('/{id}/_unarchive', 'LikeController@unArchive')->name('likes.unarchive');
+        Route::post('/_query', 'LikeController@listQuery')->name('likes.listQuery');
     });
 });
 

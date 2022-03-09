@@ -14,7 +14,8 @@ class LikeController extends Controller
      * @param $id
      * @return PostLikeResource|int
      */
-    public function archive($id) {
+    public function archive($id)
+    {
         $like = PostLike::findOrFail($id);
         $user = auth()->user();
         if ($user->can('archive', $like)) {
@@ -39,7 +40,8 @@ class LikeController extends Controller
      * @param $id
      * @return PostLikeResource|int
      */
-    public function unArchive($id) {
+    public function unArchive($id)
+    {
         $like = PostLike::findOrFail($id);
         $user = auth()->user();
         if ($user->can('archive', $like)) {
@@ -56,5 +58,16 @@ class LikeController extends Controller
                 'code' => 'NOT_AUTHORIZED',
             ], 403);
         }
+    }
+
+    public function listQuery(Request $request)
+    {
+        $validatedData = $request->validate([
+            'postIds' => 'array|required'
+        ]);
+        $likes = PostLike::where('user_id', auth()->id())
+            ->whereIn('post_id', $validatedData['postIds'])->get();
+
+        return PostLikeResource::collection($likes);
     }
 }
