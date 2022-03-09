@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddGoogleOpenIdToUsers extends Migration
+class DropWechatOpenIdColumnFromUsersTable extends Migration
 {
     /**
      * Run the migrations.
@@ -14,7 +14,7 @@ class AddGoogleOpenIdToUsers extends Migration
     public function up()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('google_open_id')->nullable()->after('wechat_open_id');
+            $table->dropColumn('wechat_open_id');
         });
     }
 
@@ -26,7 +26,7 @@ class AddGoogleOpenIdToUsers extends Migration
     public function down()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('google_open_id');
+            $table->string('wechat_open_id')->nullable()->after('mobile_verified_at');
         });
     }
 }

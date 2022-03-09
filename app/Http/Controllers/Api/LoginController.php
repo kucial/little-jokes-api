@@ -9,6 +9,7 @@ use App\Notifications\PhoneLogin;
 use App\User;
 use App\Http\Resources\User as UserResource;
 use App\Services\AppleToken;
+use App\UserSocialAccount;
 use Illuminate\Contracts\Hashing\Hasher;
 use Illuminate\Database\Eloquent\Concerns\HasAttributes;
 use Illuminate\Http\Request;
@@ -141,6 +142,7 @@ class LoginController extends Controller
     public function handleWeixinProviderCallback(Request $request)
     {
         $oauthUser = Socialite::driver('weixin')->stateless()->user();
+
         /**
         {
         "accessTokenResponseBody": {
@@ -171,17 +173,40 @@ class LoginController extends Controller
         }
         }
          */
-        $user = User::where('wechat_open_id', $oauthUser->id)->first();
-        if (is_null($user)) {
+        $socialAccount = UserSocialAccount::where('provider', 'wechat')
+            ->where('client_id', config('services.weixin.client_id'))
+            ->where('openid', $oauthUser->id)
+            ->with('user')
+            ->first();
+
+        if (is_null($socialAccount)) {
             $user = new User();
             $user->name = $oauthUser->nickname;
             $user->password = $oauthUser->id;
-            $user->wechat_open_id = $oauthUser->id;
             $user->api_token = User::generateToken();
             $user->save();
-        }
 
-        return $this->loginSuccess($user);
+            $socialAccount = new UserSocialAccount();
+            $socialAccount->user_id = $user->id;
+            $socialAccount->openid = $oauthUser->id;
+            $socialAccount->provider = 'wechat';
+            $socialAccount->client_id = config('services.weixin.client_id');
+            $socialAccount->username = $oauthUser->nickname;
+            $socialAccount->access_token = $oauthUser->token;
+            $socialAccount->refresh_token = $oauthUser->refreshToken;
+            $socialAccount->info = $oauthUser->user;
+            $socialAccount->save();
+
+            return $this->loginSuccess($user);
+        } else {
+            $socialAccount->username = $oauthUser->nickname;
+            $socialAccount->access_token = $oauthUser->token;
+            $socialAccount->refresh_token = $oauthUser->refreshToken;
+            $socialAccount->info = $oauthUser->user;
+            $socialAccount->save();
+
+            return $this->loginSuccess($socialAccount->user);
+        }
     }
 
     public function withGoogleIdToken(Request $request)
@@ -195,17 +220,54 @@ class LoginController extends Controller
         ]);
 
         $payload = $client->verifyIdToken($validatedData['idToken']);
+
+        // {
+        //     "at_hash": "Hyq4kXVZ_OFgQyWU-mtBng",
+        //     "aud": "519686545414-pe1fh36s83f9p7c6kk1tgm31qthd5dre.apps.googleusercontent.com",
+        //     "azp": "519686545414-pe1fh36s83f9p7c6kk1tgm31qthd5dre.apps.googleusercontent.com",
+        //     "email": "kongkx.yang@gmail.com",
+        //     "email_verified": true,
+        //     "exp": 1646150027,
+        //     "family_name": "yang",
+        //     "given_name": "kongkx",
+        //     "iat": 1646146427,
+        //     "iss": "https://accounts.google.com",
+        //     "locale": "zh-CN",
+        //     "name": "kongkx yang",
+        //     "nonce": "gxCBqVrN2q_9dX2pR0QLtaVo3gj3GrsfUOGeCacgJF0",
+        //     "picture": "https://lh3.googleusercontent.com/a/AATXAJwnj8XDQuxqkhgyn3m7pQtIrH8eoa4gL6_XLFAQ=s96-c",
+        //     "sub": "100635365667200547749",
+        //   }
+
         if ($payload) {
-            $user = User::where('google_open_id', $payload['sub'])->first();
-            if (is_null($user)) {
+            $socialAccount = UserSocialAccount::where('provider', 'google')
+                ->where('client_id', $validatedData['clientId'])
+                ->where('openid', $payload['sub'])
+                ->with('user')
+                ->first();
+            if (is_null($socialAccount)) {
                 $user = new User();
                 $user->name = $payload['name'];
                 $user->password = $payload['sub'];
-                $user->google_open_id = $payload['sub'];
                 $user->api_token = User::generateToken();
                 $user->save();
+
+                $socialAccount = new UserSocialAccount();
+                $socialAccount->user_id = $user->id;
+                $socialAccount->openid = $payload['sub'];
+                $socialAccount->provider = 'google';
+                $socialAccount->client_id = $validatedData['clientId'];
+                $socialAccount->username = $payload['name'];
+                $socialAccount->info = $payload;
+                $socialAccount->save();
+                return $this->loginSuccess($user);
+            } else {
+                $socialAccount->username = $payload['name'];
+                $socialAccount->info = $payload;
+                $socialAccount->save();
+
+                return $this->loginSuccess($socialAccount->user);
             }
-            return $this->loginSuccess($user);
         } else {
             return response()->json([
                 'code' => 'INVALID_TOKEN'
@@ -218,16 +280,16 @@ class LoginController extends Controller
         $validatedData = $request->validate([
             'code' => 'required',
             'openid' => 'sometimes',
-            'clientId' => 'sometimes',
+            'clientId' => 'sometimes',  // may support multi client
             'idToken' => 'sometimes',
         ]);
+
 
         try {
             // $clientSecret = Storage::disk('local')->get('apple_secret');
             // config()->set('services.apple.client_secret', $clientSecret);
             config()->set('services.apple.client_secret', $appleToken->generate());
             $oauthUser = Socialite::driver('apple')->stateless()->user();
-
 
             // {
             //     "accessTokenResponseBody": Object {
@@ -262,17 +324,38 @@ class LoginController extends Controller
             //     },
             //   }
 
-            $user = User::where('apple_open_id', $oauthUser->id)->first();
-            if (is_null($user)) {
+            $socialAccount = UserSocialAccount::where('provider', 'apple')
+                ->where('client_id', config()->get('services.apple.client_id'))
+                ->where('openid', $oauthUser->id)
+                ->with('user')
+                ->first();
+
+            if (is_null($socialAccount)) {
                 $user = new User();
-                $user->name = $oauthUser->name ?? User::randomName();
-                $user->email = $oauthUser->email;
+                $user->name = $oauthUser->name || 'apple';
                 $user->password = $oauthUser->id;
-                $user->apple_open_id = $oauthUser->id;
                 $user->api_token = User::generateToken();
                 $user->save();
+
+                $socialAccount = new UserSocialAccount();
+                $socialAccount->user_id = $user->id;
+                $socialAccount->openid = $oauthUser->id;
+                $socialAccount->provider = 'apple';
+                $socialAccount->client_id = config()->get('services.apple.client_id');
+                $socialAccount->username = $oauthUser->name || 'apple';
+
+                $socialAccount->access_token = $oauthUser->accessTokenResponseBody['access_token'];
+                $socialAccount->refresh_token = $oauthUser->refreshToken;
+
+                $socialAccount->info = $oauthUser->user;
+                $socialAccount->save();
+                return $this->loginSuccess($user);
+            } else {
+                $socialAccount->info = $oauthUser->user;
+                $socialAccount->save();
+
+                return $this->loginSuccess($socialAccount->user);
             }
-            return $this->loginSuccess($user);
         } catch (\Exception $e) {
             return response()->json([
                 'code' => 'ERROR',

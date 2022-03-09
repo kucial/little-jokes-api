@@ -23,6 +23,7 @@
         "sleep-cat/opencc-php": "^3.2",
         "socialiteproviders/apple": "^5.0",
         "socialiteproviders/github": "^4.1",
+        "socialiteproviders/google": "^4.1",
         "socialiteproviders/weixin": "^4.0",
         "socialiteproviders/weixin-web": "^4.1"
     },

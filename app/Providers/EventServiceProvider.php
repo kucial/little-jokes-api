@@ -22,7 +22,8 @@ class EventServiceProvider extends ServiceProvider
             'SocialiteProviders\\Weixin\\WeixinExtendSocialite@handle',
             'SocialiteProviders\\WeixinWeb\\WeixinWebExtendSocialite@handle',
             'SocialiteProviders\\GitHub\\GitHubExtendSocialite@handle',
-            \SocialiteProviders\Apple\AppleExtendSocialite::class . '@handle'
+            \SocialiteProviders\Apple\AppleExtendSocialite::class . '@handle',
+            \SocialiteProviders\Google\GoogleExtendSocialite::class . '@handle',
         ],
     ];
 

@@ -73,4 +73,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(PostReport::class);
     }
+
+    public function socialAccounts()
+    {
+        return $this->hasMany(UserSocialAccount::class);
+    }
 }
