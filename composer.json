@@ -10,6 +10,7 @@
     "require": {
         "php": "^7.2.5",
         "alibabacloud/sdk": "^1.8",
+        "alphasnow/opencc-php": "dev-master",
         "fideloper/proxy": "^4.2",
         "fruitcake/laravel-cors": "^2.0",
         "google/apiclient": "^2.12",
@@ -20,7 +21,6 @@
         "laravel/tinker": "^2.0",
         "lcobucci/jwt": "^4.1",
         "overtrue/laravel-wechat": "~5.0",
-        "sleep-cat/opencc-php": "^3.2",
         "socialiteproviders/apple": "^5.0",
         "socialiteproviders/github": "^4.1",
         "socialiteproviders/google": "^4.1",
@@ -76,10 +76,14 @@
             "@php artisan key:generate --ansi"
         ]
     },
-    "repositories": {
-        "packagist": {
+    "repositories": [
+        {
             "type": "composer",
             "url": "https://mirrors.aliyun.com/composer/"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/alphasnow/opencc-php.git"
         }
-    }
+    ]
 }

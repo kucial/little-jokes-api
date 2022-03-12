@@ -17,13 +17,15 @@ use Illuminate\Validation\Rule;
 class PostController extends Controller
 {
 
-    private function t2s($text) {
-        return \OpenCC::transform($text, 't2s.json');
+    private function t2s($text)
+    {
+        return \OpenCC::convert($text, 't2s.json');
     }
     /**
      * Create Post
      */
-    public function create(Request $request) {
+    public function create(Request $request)
+    {
         $userId = auth()->id();
         $validatedData = $request->validate([
             'title' => 'sometimes|max:200',
@@ -41,7 +43,8 @@ class PostController extends Controller
     /**
      * 更新 Post
      */
-    public function update(Request $request, $id) {
+    public function update(Request $request, $id)
+    {
         $user = auth()->user();
         $post = Post::findOrFail($id);
         if ($user->can('edit', $post)) {
@@ -66,7 +69,8 @@ class PostController extends Controller
     /**
      *  Delete Post
      */
-    public function delete(Request $request, $id) {
+    public function delete(Request $request, $id)
+    {
         $user = auth()->user();
         $post = Post::findOrFail($id);
         if ($user->can('edit', $post)) {
@@ -92,10 +96,11 @@ class PostController extends Controller
      * @param $id
      * @return mixed
      */
-    public function view($id) {
+    public function view($id)
+    {
         $userId = auth()->id();
         $post = Post::with([
-            'like' => function($query) use ($userId) {
+            'like' => function ($query) use ($userId) {
                 $query->where('post_likes.user_id', $userId);
             }
         ])->findOrFail($id);
@@ -108,7 +113,8 @@ class PostController extends Controller
      * @param $id
      * @return PostResource|\Illuminate\Http\JsonResponse
      */
-    public function like($id) {
+    public function like($id)
+    {
         $userId = auth()->id();
         $post = Post::with([
             'like' => function ($query) use ($userId) {
@@ -128,7 +134,7 @@ class PostController extends Controller
         $postLike->post_id = $post->id;
         $postLike->save();
         $post->load([
-            'like' => function($query) use ($userId) {
+            'like' => function ($query) use ($userId) {
                 $query->where('post_likes.user_id', $userId);
             }
         ]);
@@ -143,7 +149,8 @@ class PostController extends Controller
      * @param $id
      * @return PostResource|\Illuminate\Http\JsonResponse
      */
-    public function unlike($id) {
+    public function unlike($id)
+    {
         $userId = auth()->id();
         $post = Post::with([
             'like' => function ($query) use ($userId) {
@@ -182,7 +189,7 @@ class PostController extends Controller
 
         $posts = Post::select('posts.*')
             ->with([
-                'like' => function($query) use($userId) {
+                'like' => function ($query) use ($userId) {
                     $query->where('post_likes.user_id', $userId);
                 }
             ])
@@ -200,12 +207,12 @@ class PostController extends Controller
     {
         $pageSize = (int) $request->query('page_size', 20);
         $posts = Post::with([
-            'like' => function ($query) use($userId) {
+            'like' => function ($query) use ($userId) {
                 $query->where('post_likes.user_id', $userId);
             }
         ])->where('posts.user_id', $userId)
-        ->orderBy('created_at', 'desc')
-        ->paginate($pageSize);
+            ->orderBy('created_at', 'desc')
+            ->paginate($pageSize);
         return PostResource::collection($posts);
     }
 
@@ -216,7 +223,8 @@ class PostController extends Controller
      * @param $id
      * @return PostReportResource|\Illuminate\Http\JsonResponse
      */
-    public function report(Request $request, $id) {
+    public function report(Request $request, $id)
+    {
         $post = Post::findOrFail($id);
         $user = auth()->user();
         $report = $post->reports()->where('user_id', $user->getKey())->first();
@@ -237,7 +245,6 @@ class PostController extends Controller
         $report->save();
 
         return new PostReportResource($report);
-
     }
 
     /**
@@ -261,8 +268,8 @@ class PostController extends Controller
         ]);
 
         $vote = PostVote::firstOrNew(
-                ['user_id' => $user->getKey(), 'post_id' => $id]
-            );
+            ['user_id' => $user->getKey(), 'post_id' => $id]
+        );
 
         if ($vote->id) {
             if ($vote->vote_type !== $validatedDate['vote_type']) {
@@ -275,18 +282,18 @@ class PostController extends Controller
         }
 
         return new PostVoteResource($vote);
-
     }
 
-    public function search(Request $request) {
+    public function search(Request $request)
+    {
         $keyword = $request->query('q');
         $userId = auth()->id();
         $pageSize = $request->query('page_size', 20);
         $posts = Post::with([
-            'like' => function ($query) use($userId) {
+            'like' => function ($query) use ($userId) {
                 $query->where('post_likes.user_id', $userId);
             }
-        ])->where('content', 'like', '%'.$keyword.'%')
+        ])->where('content', 'like', '%' . $keyword . '%')
             ->orderBy('created_at', 'desc')
             ->paginate($pageSize);
         return PostResource::collection($posts);
